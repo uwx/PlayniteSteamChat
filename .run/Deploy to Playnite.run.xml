@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Deploy to Playnite" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" target_folder="$USER_HOME$/AppData/Roaming/Playnite/Extensions/SteamLikeLastActivity" target_framework="net48" uuid_high="5927650340865787643" uuid_low="-5058068740830848127" />
+    <method v="2" />
+  </configuration>
+</component>
