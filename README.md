@@ -8,7 +8,7 @@ warranty is provided.
 
 ## Installation
 
-[Download the .pext](https://github.com/uwx/PlayniteSteamLikeLastActivity/blob/master/Packed/Update_Last_Played_with_Game_Added_1_1.pext?raw=true) and open it with Playnite.
+[Download the .pext](https://github.com/uwx/PlayniteSteamLikeLastActivity/raw/master/Packed/Steam-like_Last_Played_1_2.pext) and open it with Playnite.
 
 You have to restart Playnite after installing the extension.
 
