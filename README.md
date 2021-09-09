@@ -3,7 +3,7 @@
 Automatically refreshes [Playnite](https://playnite.link/) games' Last Played property with the value of the DateAdded
 property, if it's more recent. The resulting behavior is similar to Steam's Recent section.
 
-:warn: **Disclaimer:** This is extension is still in beta stage. Consider making a backup of your Playnite library! No
+⚠️ **Disclaimer:** This is extension is still in beta stage. Consider making a backup of your Playnite library! No
 warranty is provided.
 
 ## Installation
