@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 namespace SteamLikeLastActivity
 {
     [PublicAPI]
-    public class SteamLikeLastActivity : Plugin
+    public class SteamLikeLastActivity : GenericPlugin
     {
         // private static readonly ILogger Logger = LogManager.GetLogger();
         //
@@ -20,20 +20,19 @@ namespace SteamLikeLastActivity
 
         public override Guid Id { get; } = Guid.Parse("5c4396d8-4be4-4efb-9db8-46cc83c263c0");
 
+        private readonly MainMenuItem[] _mainMenuItems;
+
         public SteamLikeLastActivity(IPlayniteAPI api) : base(api)
         {
             // Settings = new SteamLikeLastActivitySettings(this);
-            
+
             // Run first-time update process
             UpdateLastActivity(PlayniteApi.Database.Games);
-            
+
             // Update newly added games
             api.Database.Games.ItemCollectionChanged += (sender, args) => UpdateLastActivity(args.AddedItems, true);
-        }
 
-        public override List<MainMenuItem> GetMainMenuItems(GetMainMenuItemsArgs args)
-        {
-            return new List<MainMenuItem>
+            _mainMenuItems = new[]
             {
                 new MainMenuItem
                 {
@@ -43,6 +42,8 @@ namespace SteamLikeLastActivity
                 }
             };
         }
+
+        public override IEnumerable<MainMenuItem> GetMainMenuItems(GetMainMenuItemsArgs args) => _mainMenuItems;
 
         private void UpdateLastActivity(IEnumerable<Game> gamesToUpdate, bool isBuffered = false)
         {
