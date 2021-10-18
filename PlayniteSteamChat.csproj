@@ -5,10 +5,17 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <None Update="extension.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="chatInitScript.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="fontello.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -17,6 +24,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CefSharp.Common" Version="94.4.50" />
+    <PackageReference Include="CefSharp.OffScreen" Version="94.4.50" />
+    <PackageReference Include="CefSharp.Wpf" Version="94.4.50" />
     <PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
