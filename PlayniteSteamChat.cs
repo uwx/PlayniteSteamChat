@@ -26,11 +26,17 @@ namespace PlayniteSteamChat
 
         private readonly SidebarItem[] _sidebarItems;
         private ChromiumWebBrowser _browser;
-        
+        private readonly PlayniteSteamChatSettings _settings;
+
         private static readonly string AssemblyFolder = Path.GetDirectoryName(typeof(PlayniteSteamChat).Assembly.Location) ?? throw new InvalidOperationException("GetDirectoryName was null");
 
         public PlayniteSteamChat(IPlayniteAPI api) : base(api)
         {
+            Properties = new GenericPluginProperties
+            {
+                HasSettings = true
+            };
+            
             //new FontFamily(new Uri("pack://application:,,,/"), "./Fonts/#Noto Sans")
             _sidebarItems = new[]
             {
@@ -47,12 +53,17 @@ namespace PlayniteSteamChat
                     Opened = GetOrCreateBrowser,
                     Closed = () =>
                     {
-                        
+                        if (!_settings.StayOpen)
+                        {
+                            using var browser = _browser;
+                            _browser = null;
+                        }
                     }
                 }
             };
+            _settings = new PlayniteSteamChatSettings(this);
         }
-
+        
         private Control GetOrCreateBrowser()
         {
             if (_browser != null)
@@ -136,14 +147,15 @@ namespace PlayniteSteamChat
         //     // Add code to be executed when library is updated.
         // }
         //
-        // public override ISettings GetSettings(bool firstRunSettings)
-        // {
-        //     return settings;
-        // }
-        //
-        // public override UserControl GetSettingsView(bool firstRunSettings)
-        // {
-        //     return new SteamLikeLastActivitySettingsView();
-        // }
+
+        public override ISettings GetSettings(bool firstRunSettings)
+        {
+            return _settings;
+        }
+
+        public override UserControl GetSettingsView(bool firstRunView)
+        {
+            return new PlayniteSteamChatSettingsView();
+        }
     }
 }

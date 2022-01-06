@@ -1,0 +1,14 @@
+﻿<UserControl x:Class="PlayniteSteamChat.PlayniteSteamChatSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:pro="clr-namespace:PlayniteSteamChat" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance pro:PlayniteSteamChatSettings}">
+    <StackPanel Margin="10">
+        <CheckBox
+            Content="Keep instance open when the Steam Chat sidebar entry is hidden"
+            Margin="0,0,0,5"
+            IsChecked="{Binding StayOpen}"/>
+    </StackPanel>
+</UserControl>
