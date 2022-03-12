@@ -1,18 +1,14 @@
 ﻿using Playnite.SDK;
-using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
-using CefSharp;
-using CefSharp.Wpf;
 using JetBrains.Annotations;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
 
 namespace PlayniteSteamChat
 {
@@ -25,10 +21,14 @@ namespace PlayniteSteamChat
         public override Guid Id { get; } = Guid.Parse("6fcf7f1b-128f-4e9a-8854-54935be2ffba");
 
         private readonly SidebarItem[] _sidebarItems;
-        private ChromiumWebBrowser _browser;
+        private WebView2 _browser;
+        private BrowserRenderer _browserControl;
         private readonly PlayniteSteamChatSettings _settings;
 
         private static readonly string AssemblyFolder = Path.GetDirectoryName(typeof(PlayniteSteamChat).Assembly.Location) ?? throw new InvalidOperationException("GetDirectoryName was null");
+
+        private readonly Lazy<Task<CoreWebView2Environment>> _webViewEnvironment;
+        private Task<CoreWebView2Environment> WebViewEnvironment => _webViewEnvironment.Value;
 
         public PlayniteSteamChat(IPlayniteAPI api) : base(api)
         {
@@ -57,96 +57,56 @@ namespace PlayniteSteamChat
                         {
                             using var browser = _browser;
                             _browser = null;
+                            _browserControl = null;
                         }
                     }
                 }
             };
             _settings = new PlayniteSteamChatSettings(this);
+
+            _webViewEnvironment = new Lazy<Task<CoreWebView2Environment>>(() => CoreWebView2Environment.CreateAsync(userDataFolder: GetPluginUserDataPath()));
         }
         
         private Control GetOrCreateBrowser()
         {
-            if (_browser != null)
+            if (_browserControl != null)
             {
-                return _browser;
+                return _browserControl;
             }
             
             Logger.Info("Initializing Chromium Browser");
-            
-            _browser = new ChromiumWebBrowser("https://steamcommunity.com/chat/");
-            _browser.LoadingStateChanged += OnBrowserLoadingStateChanged;
-            return _browser;
-        }
 
-        private void OnBrowserLoadingStateChanged(object sender, LoadingStateChangedEventArgs args)
-        {
-            if (args.IsLoading)
+            _browser = new WebView2();
+            _ = HandleWebViewInitAsync().ContinueWith(task =>
             {
-                return;
-            }
-
-            // Remove the load event handler, because we only want one snapshot of the initial page.
-            _browser.LoadingStateChanged -= OnBrowserLoadingStateChanged;
-
-            #if DEBUG
-            _browser.ShowDevTools();
-            #endif
-
-            _ = Task.Run(async () =>
-            {
-                try
+                if (task.IsFaulted)
                 {
-                    await _browser.EvaluateScriptAsync(File.ReadAllText(Path.Combine(AssemblyFolder, "chatInitScript.js")));
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "While evaluating chatInitScript");
+                    Logger.Error(task.Exception, "WebView initialization failed");
                 }
             });
+
+            _browserControl = new BrowserRenderer(_browser);
+            return _browserControl;
+        }
+
+        private async Task HandleWebViewInitAsync()
+        {
+            await _browser.EnsureCoreWebView2Async(await WebViewEnvironment);
+            await _browser.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(File.ReadAllText(Path.Combine(AssemblyFolder, "chatInitScript.js")));
+            _browser.CoreWebView2.Navigate("https://steamcommunity.com/chat/");
+
+            #if DEBUG
+            _browser.CoreWebView2.OpenDevToolsWindow();
+            #endif
+        }
+
+        internal async Task OpenDevToolsAsync()
+        {
+            await _browser.EnsureCoreWebView2Async(await WebViewEnvironment);
+            _browser.CoreWebView2.OpenDevToolsWindow();
         }
 
         public override IEnumerable<SidebarItem> GetSidebarItems() => _sidebarItems;
-
-        // public override void OnGameInstalled(Game game)
-        // {
-        //     // Add code to be executed when game is finished installing.
-        // }
-        //
-        // public override void OnGameStarted(Game game)
-        // {
-        //     // Add code to be executed when game is started running.
-        // }
-        //
-        // public override void OnGameStarting(Game game)
-        // {
-        //     // Add code to be executed when game is preparing to be started.
-        // }
-        //
-        // public override void OnGameStopped(Game game, long elapsedSeconds)
-        // {
-        //     // Add code to be executed when game is preparing to be started.
-        // }
-        //
-        // public override void OnGameUninstalled(Game game)
-        // {
-        //     // Add code to be executed when game is uninstalled.
-        // }
-        //
-        // public override void OnApplicationStarted()
-        // {
-        //     // Add code to be executed when Playnite is initialized.
-        // }
-        //
-        // public override void OnApplicationStopped()
-        // {
-        //     // Add code to be executed when Playnite is shutting down.
-        // }
-        //
-        // public override void OnLibraryUpdated()
-        // {
-        //     // Add code to be executed when library is updated.
-        // }
-        //
 
         public override ISettings GetSettings(bool firstRunSettings)
         {

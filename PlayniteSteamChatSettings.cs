@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 using Newtonsoft.Json;
@@ -61,6 +62,21 @@ namespace PlayniteSteamChat
         {
             errors = new List<string>();
             return true;
+        }
+
+        public void OpenDevTools()
+        {
+            _plugin.OpenDevToolsAsync().ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                {
+                    Logger.Error(task.Exception, "Failed to open DevTools");
+                    MessageBox.Show(
+                        $"Failed to open DevTools due to exception: {task.Exception.GetType().Name}:\n{task.Exception.Message}",
+                        "Failed to open DevTools"
+                    );
+                }
+            });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
